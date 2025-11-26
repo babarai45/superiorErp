@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Login - CampusGPT{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent mb-2">
+                CampusGPT
+            </h1>
+            <p class="text-slate-400">Student Portal Login</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-200 dark:border-slate-700">
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-6 space-y-3">
+                {% for message in messages %}
+                <div class="p-4 rounded-lg {% if message.tags %}bg-{{ message.tags }}-50 dark:bg-{{ message.tags }}-900/30 text-{{ message.tags }}-800 dark:text-{{ message.tags }}-200 border border-{{ message.tags }}-200 dark:border-{{ message.tags }}-700{% else %}bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-slate-50">
+                Welcome Back
+            </h2>
+
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-sm font-bold text-slate-900 dark:text-slate-50 mb-2">
+                        University Email
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="student.su25-bsse-s24-001@superior.edu.pk"
+                        required
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-50 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    >
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="block text-sm font-bold text-slate-900 dark:text-slate-50 mb-2">
+                        Password (Your Roll Number)
+                    </label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="su25-bsse-s24-001"
+                        required
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-slate-50 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                    >
+                </div>
+
+                <!-- Login Button -->
+                <button
+                    type="submit"
+                    class="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-indigo-500/50 transition-all mt-6"
+                >
+                    Login to Portal
+                </button>
+            </form>
+
+            <!-- Help Text -->
+            <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+                <p class="text-sm text-slate-600 dark:text-slate-400 text-center">
+                    Don't have an account?<br>
+                    <a href="{% url 'admission_main' %}" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
+                        Apply for Admission
+                    </a>
+                </p>
+            </div>
+
+            <!-- Credentials Info -->
+            <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg">
+                <p class="text-sm text-blue-800 dark:text-blue-200">
+                    <span class="font-bold">Login Credentials:</span><br>
+                    Email: Your university email from admission<br>
+                    Password: Your roll number (e.g., su25-bsse-s24-001)
+                </p>
+            </div>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-6">
+            <a href="{% url 'home' %}" class="text-slate-400 hover:text-slate-300 transition">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

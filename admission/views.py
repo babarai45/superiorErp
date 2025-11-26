@@ -554,25 +554,120 @@ def send_eligibility_email(application):
 
 
 def generate_student_credentials(application):
-    """Generate roll number and university email"""
-    course_selection = application.course_selection
+    """Generate roll number, university email, and create User account"""
+    from accounts.models import User, StudentProfile
+    from django.db import IntegrityError
+    import uuid
 
-    # Generate roll number format: su92-bscs-s24-001
-    year_code = date.today().year % 100  # Last 2 digits of year
-    semester = 'fall' if course_selection.intake == 'fall' else 'spring'
-    semester_code = 's24' if date.today().month <= 6 else 's24'
+    try:
+        print(f"\n🔄 Starting credential generation for {application.application_id}...")
 
-    # Get count to generate sequential ID
-    count = AdmissionApplication.objects.filter(
-        admission_status='approved'
-    ).count()
+        course_selection = application.course_selection
+        personal_info = application.personal_info
 
-    roll_number = f"su{year_code}-{course_selection.program.lower()}-{semester_code}-{count + 1:03d}"
-    university_email = f"student.{roll_number}@superior.edu.pk"
+        # Generate roll number format: su92-bscs-s24-001
+        year_code = date.today().year % 100  # Last 2 digits of year
+        semester = 'fall' if course_selection.intake == 'fall' else 'spring'
+        semester_code = 's24' if date.today().month <= 6 else 's24'
 
-    application.roll_number = roll_number
-    application.university_email = university_email
-    application.save()
+        # Get count to generate sequential ID
+        count = AdmissionApplication.objects.filter(
+            admission_status='approved'
+        ).count()
+
+        roll_number = f"su{year_code}-{course_selection.program.lower()}-{semester_code}-{count + 1:03d}"
+        university_email = f"student.{roll_number}@superior.edu.pk"
+
+        print(f"✓ Generated Roll Number: {roll_number}")
+        print(f"✓ Generated Email: {university_email}")
+
+        application.roll_number = roll_number
+        application.university_email = university_email
+        application.save()
+        print(f"✓ Saved to application")
+
+        # Check if user already exists
+        if User.objects.filter(email=university_email).exists():
+            print(f"⚠ User already exists: {university_email}")
+            return
+
+        # Extract name parts carefully
+        full_name = personal_info.full_name.strip() if personal_info.full_name else 'Student'
+        name_parts = full_name.split()
+        first_name = name_parts[0] if len(name_parts) > 0 else 'Student'
+        last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+
+        print(f"✓ Name: {first_name} {last_name}")
+
+        # Create User account with roll number as password
+        try:
+            user = User.objects.create_user(
+                email=university_email,
+                password=roll_number,  # Password is the roll number
+                username=roll_number,
+                first_name=first_name,
+                last_name=last_name,
+                role='student',
+                phone=personal_info.phone if personal_info.phone else '',
+                is_verified=True,
+                is_active=True,
+            )
+            print(f"✓ User account created")
+
+        except IntegrityError as ue:
+            print(f"✗ User creation failed: {str(ue)}")
+            return
+
+        # Generate unique personal email if needed
+        personal_email = application.email  # Use admission email
+
+        # Create StudentProfile with error handling for constraints
+        try:
+            student_profile = StudentProfile.objects.create(
+                user=user,
+                roll_number=roll_number,
+                father_name=personal_info.father_name if personal_info.father_name else 'N/A',
+                cnic=personal_info.cnic if personal_info.cnic else f"TEMP-{uuid.uuid4().hex[:10]}",
+                date_of_birth=personal_info.date_of_birth,
+                gender=personal_info.gender if personal_info.gender else 'M',
+                personal_email=personal_email,
+                university_email=university_email,
+                whatsapp_number=personal_info.whatsapp if personal_info.whatsapp else '',
+                intake=course_selection.intake,
+                program=course_selection.program,
+                is_approved=True,
+            )
+            print(f"✓ StudentProfile created")
+
+        except IntegrityError as pe:
+            print(f"✗ StudentProfile creation failed (constraint): {str(pe)}")
+            print(f"   Trying to update existing profile...")
+            # Try to update instead of create
+            try:
+                student_profile = StudentProfile.objects.filter(user=user).first()
+                if not student_profile:
+                    # Delete user if profile creation completely fails
+                    user.delete()
+                    print(f"✗ Failed to create/update StudentProfile, rolled back user creation")
+                    return
+            except Exception as e2:
+                print(f"✗ Error handling constraint: {str(e2)}")
+                user.delete()
+                return
+
+        print(f"✅ SUCCESS! User account created and ready to login")
+        print(f"   Email: {university_email}")
+        print(f"   Password: {roll_number}")
+
+    except AttributeError as ae:
+        print(f"✗ Missing required data: {str(ae)}")
+        print(f"   Make sure personal_info and course_selection exist")
+        import traceback
+        traceback.print_exc()
+    except Exception as e:
+        print(f"✗ Unexpected error: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 
 def send_admission_confirmation_email(application):

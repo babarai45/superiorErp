@@ -45,6 +45,9 @@ urlpatterns = [
     path("register/teacher/", teacher_register, name="teacher_register"),
     path("register/staff/", staff_register, name="staff_register"),
 
+    # Student Account (Dashboard, Profile)
+    path("account/", include("accounts.urls")),
+
     # Admission
     path("admission/", include("admission.urls")),
 
