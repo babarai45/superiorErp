@@ -447,7 +447,7 @@ def admission_stage5(request, app_id):
         
         # Check if transport option is selected (checkbox)
         transport_option = request.POST.get('transport_option')
-        transport_fee = float(transport_option) if transport_option else 0
+        transport_fee = 10000 if transport_option else 0
 
         total_amount = admission_fee + first_semester_fee + student_card_fee + transport_fee
 
