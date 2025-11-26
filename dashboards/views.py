@@ -82,7 +82,7 @@ def student_dashboard(request):
         'semester_gpa': semester_gpa,
     }
 
-    return render(request, 'dashboards/student_dashboard.html', context)
+    return render(request, 'accounts/student_dashboard.html', context)
 
 
 @login_required(login_url='login')

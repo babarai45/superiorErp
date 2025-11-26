@@ -76,6 +76,15 @@ def student_profile_edit(request):
             if phone:
                 request.user.phone = phone
 
+            # Handle profile image upload
+            if 'profile_image' in request.FILES:
+                profile_image = request.FILES['profile_image']
+                # Check file size (max 5MB)
+                if profile_image.size > 5 * 1024 * 1024:
+                    messages.error(request, 'Image size must be less than 5MB.')
+                    return render(request, 'accounts/student_profile_edit.html', {'student': student_profile})
+                request.user.profile_image = profile_image
+
             request.user.save()
 
             # Update student profile

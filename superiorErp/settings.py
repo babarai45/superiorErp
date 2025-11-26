@@ -160,3 +160,7 @@ SERVER_EMAIL = 'admissions@superior.edu.pk'
 
 # Site URL for admission links in emails
 SITE_URL = 'http://localhost:8000'
+
+# Media Files Configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
