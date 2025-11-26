@@ -64,14 +64,14 @@
                 <span>Student Card Fee</span>
                 <span class="font-bold">PKR 5,000</span>
             </div>
-            <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+            <div id="transportFeeRow" class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg" style="display: none;">
                 <span>Transport Fee (Optional)</span>
                 <span class="font-bold">PKR 10,000</span>
             </div>
             
             <div class="border-t border-slate-200 dark:border-slate-600 pt-3 flex justify-between items-center p-3 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30 rounded-lg">
                 <span class="font-bold text-lg">Total Amount</span>
-                <span class="font-bold text-2xl text-indigo-600 dark:text-indigo-400">PKR 67,500</span>
+                <span id="totalAmount" class="font-bold text-2xl text-indigo-600 dark:text-indigo-400">PKR 57,500</span>
             </div>
         </div>
         
@@ -183,6 +183,32 @@
         </form>
     </div>
 </div>
+
+<script>
+    // Handle transport fee checkbox
+    const transportCheckbox = document.querySelector('input[name="transport_option"]');
+    const transportFeeRow = document.getElementById('transportFeeRow');
+    const totalAmountElement = document.getElementById('totalAmount');
+    
+    const baseAmount = 15000 + 37500 + 5000; // Admission + Semester + Card fees
+    const transportFee = 10000;
+    
+    function updateTotal() {
+        if (transportCheckbox.checked) {
+            transportFeeRow.style.display = 'flex';
+            totalAmountElement.textContent = 'PKR ' + (baseAmount + transportFee).toLocaleString();
+        } else {
+            transportFeeRow.style.display = 'none';
+            totalAmountElement.textContent = 'PKR ' + baseAmount.toLocaleString();
+        }
+    }
+    
+    // Update total when checkbox changes
+    transportCheckbox.addEventListener('change', updateTotal);
+    
+    // Set initial state
+    updateTotal();
+</script>
 
 </body>
 </html>

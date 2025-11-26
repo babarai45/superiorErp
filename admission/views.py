@@ -444,7 +444,10 @@ def admission_stage5(request, app_id):
         admission_fee = 15000
         first_semester_fee = 75000 / 2  # Half of first semester
         student_card_fee = 5000
-        transport_fee = float(request.POST.get('transport_fee', 0))
+        
+        # Check if transport option is selected (checkbox)
+        transport_option = request.POST.get('transport_option')
+        transport_fee = 10000 if transport_option else 0
 
         total_amount = admission_fee + first_semester_fee + student_card_fee + transport_fee
 
