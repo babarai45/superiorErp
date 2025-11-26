@@ -1,0 +1,424 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusGPT - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+
+{% block content %}
+
+<div class="w-full max-w-md">
+    <!-- Logo/Branding -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent mb-2">
+            CampusGPT
+        </h1>
+        <p class="text-slate-600 dark:text-slate-400 text-sm">AI-Powered University ERP System</p>
+    </div>
+
+    <!-- Role Selection Card -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8" id="roleSelection">
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-2 text-center">
+            CampusGPT Login
+        </h2>
+        <p class="text-center text-slate-600 dark:text-slate-400 mb-8">
+            Choose your role to continue
+        </p>
+
+        <!-- Role Selection Buttons -->
+        <div class="space-y-3">
+            <button onclick="showLoginForm('student')" class="w-full flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-slate-700 dark:to-slate-600 border-2 border-indigo-600 hover:border-indigo-700 rounded-xl transition-all hover:shadow-lg group">
+                <span class="text-2xl">👨‍🎓</span>
+                <div class="text-left">
+                    <div class="font-bold text-slate-900 dark:text-slate-50 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">Login as Student</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400">Roll Number + Password</div>
+                </div>
+                <span class="ml-auto text-indigo-600">→</span>
+            </button>
+
+            <button onclick="showLoginForm('teacher')" class="w-full flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-slate-700 dark:to-slate-600 border-2 border-blue-600 hover:border-blue-700 rounded-xl transition-all hover:shadow-lg group">
+                <span class="text-2xl">👨‍🏫</span>
+                <div class="text-left">
+                    <div class="font-bold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">Login as Teacher</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400">Email + Password</div>
+                </div>
+                <span class="ml-auto text-blue-600">→</span>
+            </button>
+
+            <button onclick="showLoginForm('staff')" class="w-full flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-slate-700 dark:to-slate-600 border-2 border-cyan-600 hover:border-cyan-700 rounded-xl transition-all hover:shadow-lg group">
+                <span class="text-2xl">👔</span>
+                <div class="text-left">
+                    <div class="font-bold text-slate-900 dark:text-slate-50 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition">Login as Staff</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400">Staff ID or Email + Password</div>
+                </div>
+                <span class="ml-auto text-cyan-600">→</span>
+            </button>
+        </div>
+
+        <!-- Back to Homepage Link -->
+        <div class="mt-8 text-center">
+            <a href="{% url 'home' %}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium">
+                ← Back to Homepage
+            </a>
+        </div>
+    </div>
+
+    <!-- Student Login Form -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8 hidden" id="studentLoginForm">
+        <div class="mb-6">
+            <button onclick="showRoleSelection()" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 text-sm font-medium flex items-center gap-1">
+                ← Back to Roles
+            </button>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-2">
+            Student Login
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-6 text-sm">
+            Enter your credentials to access your dashboard
+        </p>
+
+        <!-- Display Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-xl {% if message.tags %}bg-{{ message.tags }}-50 border border-{{ message.tags }}-200 text-{{ message.tags }}-800 dark:bg-{{ message.tags }}-900 dark:border-{{ message.tags }}-700 dark:text-{{ message.tags }}-200{% else %}bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Error Messages -->
+        {% if form.non_field_errors %}
+            <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 dark:bg-red-900 dark:border-red-700 dark:text-red-200">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'student_login' %}" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Roll Number Field -->
+            <div>
+                <label for="roll_number" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Roll Number
+                </label>
+                <input
+                    type="text"
+                    id="roll_number"
+                    name="roll_number"
+                    placeholder="su92-bsdsm-s24-001@superior.edu.pk"
+                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    required
+                >
+                {% if form.roll_number.errors %}
+                    <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ form.roll_number.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Password Field -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Password
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="••••••••"
+                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    required
+                >
+                {% if form.password.errors %}
+                    <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center">
+                <input
+                    type="checkbox"
+                    id="remember"
+                    name="remember"
+                    class="rounded-md"
+                >
+                <label for="remember" class="ml-2 text-sm text-slate-600 dark:text-slate-400">
+                    Remember me
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                class="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-indigo-500/50 transition-all"
+            >
+                Login
+            </button>
+        </form>
+
+        <!-- Links -->
+        <div class="mt-6 space-y-2 text-center text-sm">
+            <div>
+                <a href="{% url 'student_register' %}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 font-medium">
+                    Create a new account
+                </a>
+            </div>
+            <div>
+                <a href="#" class="text-slate-600 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
+                    Forgot password?
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Login Form -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8 hidden" id="teacherLoginForm">
+        <div class="mb-6">
+            <button onclick="showRoleSelection()" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 text-sm font-medium flex items-center gap-1">
+                ← Back to Roles
+            </button>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-2">
+            Teacher Login
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-6 text-sm">
+            Access your teaching portal and manage your courses
+        </p>
+
+        <!-- Display Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-xl {% if message.tags %}bg-{{ message.tags }}-50 border border-{{ message.tags }}-200 text-{{ message.tags }}-800 dark:bg-{{ message.tags }}-900 dark:border-{{ message.tags }}-700 dark:text-{{ message.tags }}-200{% else %}bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Error Messages -->
+        {% if form.non_field_errors %}
+            <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 dark:bg-red-900 dark:border-red-700 dark:text-red-200">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'teacher_login' %}" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Email Field -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Official Email
+                </label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="name@superior.edu.pk"
+                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    required
+                >
+                {% if form.email.errors %}
+                    <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Password Field -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Password
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="••••••••"
+                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    required
+                >
+                {% if form.password.errors %}
+                    <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center">
+                <input
+                    type="checkbox"
+                    id="remember"
+                    name="remember"
+                    class="rounded-md"
+                >
+                <label for="remember" class="ml-2 text-sm text-slate-600 dark:text-slate-400">
+                    Remember me
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-blue-500/50 transition-all"
+            >
+                Login
+            </button>
+        </form>
+
+        <!-- Links -->
+        <div class="mt-6 space-y-2 text-center text-sm">
+            <div>
+                <a href="{% url 'teacher_register' %}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium">
+                    Create a new account
+                </a>
+            </div>
+            <div>
+                <a href="#" class="text-slate-600 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
+                    Forgot password?
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Login Form -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8 hidden" id="staffLoginForm">
+        <div class="mb-6">
+            <button onclick="showRoleSelection()" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 text-sm font-medium flex items-center gap-1">
+                ← Back to Roles
+            </button>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-50 mb-2">
+            Staff Login
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-6 text-sm">
+            Access the administrative portal
+        </p>
+
+        <!-- Display Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-xl {% if message.tags %}bg-{{ message.tags }}-50 border border-{{ message.tags }}-200 text-{{ message.tags }}-800 dark:bg-{{ message.tags }}-900 dark:border-{{ message.tags }}-700 dark:text-{{ message.tags }}-200{% else %}bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Error Messages -->
+        {% if form.non_field_errors %}
+            <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 dark:bg-red-900 dark:border-red-700 dark:text-red-200">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'staff_login' %}" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Staff ID or Email Field -->
+            <div>
+                <label for="identifier" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Staff ID or Email
+                </label>
+                <input
+                    type="text"
+                    id="identifier"
+                    name="identifier"
+                    placeholder="staff001 or name@superior.edu.pk"
+                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition"
+                    required
+                >
+                {% if form.identifier.errors %}
+                    <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ form.identifier.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Password Field -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Password
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="••••••••"
+                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition"
+                    required
+                >
+                {% if form.password.errors %}
+                    <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center">
+                <input
+                    type="checkbox"
+                    id="remember"
+                    name="remember"
+                    class="rounded-md"
+                >
+                <label for="remember" class="ml-2 text-sm text-slate-600 dark:text-slate-400">
+                    Remember me
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                class="w-full px-4 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-cyan-500/50 transition-all"
+            >
+                Login
+            </button>
+        </form>
+
+        <!-- Links -->
+        <div class="mt-6 space-y-2 text-center text-sm">
+            <div>
+                <a href="{% url 'staff_register' %}" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 font-medium">
+                    Create a new account
+                </a>
+            </div>
+            <div>
+                <a href="#" class="text-slate-600 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300">
+                    Forgot password?
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Form Switching -->
+<script>
+function showLoginForm(role) {
+    document.getElementById('roleSelection').classList.add('hidden');
+
+    if (role === 'student') {
+        document.getElementById('studentLoginForm').classList.remove('hidden');
+    } else if (role === 'teacher') {
+        document.getElementById('teacherLoginForm').classList.remove('hidden');
+    } else if (role === 'staff') {
+        document.getElementById('staffLoginForm').classList.remove('hidden');
+    }
+}
+
+function showRoleSelection() {
+    document.getElementById('roleSelection').classList.remove('hidden');
+    document.getElementById('studentLoginForm').classList.add('hidden');
+    document.getElementById('teacherLoginForm').classList.add('hidden');
+    document.getElementById('staffLoginForm').classList.add('hidden');
+}
+</script>
+
+{% endblock content %}
+
+</body>
+</html>
+

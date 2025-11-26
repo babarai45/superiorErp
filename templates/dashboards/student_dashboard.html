@@ -1,0 +1,249 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - CampusGPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 dark:bg-slate-950">
+
+<!-- Navigation Header -->
+<nav class="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+            <a href="{% url 'home' %}" class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                CampusGPT
+            </a>
+            <div class="flex items-center gap-6">
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ user.first_name }} {{ user.last_name }}</span>
+                <a href="{% url 'logout' %}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-6 py-12">
+    <!-- Page Title -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            Student Dashboard
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Welcome back, {{ student.user.first_name }}! Roll Number: {{ student.roll_number }}
+        </p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <!-- Enrolled Courses -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 border-l-4 border-indigo-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Enrolled Courses</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ enrollments.count }}</p>
+                </div>
+                <div class="text-4xl">📚</div>
+            </div>
+        </div>
+
+        <!-- Current CGPA -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 border-l-4 border-blue-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Current CGPA</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                        {% if semester_gpa %}{{ semester_gpa.gpa }}{% else %}--{% endif %}
+                    </p>
+                </div>
+                <div class="text-4xl">📊</div>
+            </div>
+        </div>
+
+        <!-- Attendance -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 border-l-4 border-green-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Avg. Attendance</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ avg_attendance|floatformat:1 }}%</p>
+                </div>
+                <div class="text-4xl">✓</div>
+            </div>
+        </div>
+
+        <!-- Active Alerts -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 border-l-4 border-red-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Active Alerts</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ alerts.count }}</p>
+                </div>
+                <div class="text-4xl">⚠️</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Enrolled Courses -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">My Courses</h2>
+                    <a href="{% url 'student_courses' %}" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
+                        View All
+                    </a>
+                </div>
+                
+                {% if enrollments %}
+                    <div class="space-y-4">
+                        {% for enrollment in enrollments|slice:":3" %}
+                            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-900 dark:text-white">
+                                        {{ enrollment.course.code }} - {{ enrollment.course.title }}
+                                    </h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                        Instructor: {{ enrollment.course.teacher.user.get_full_name }}
+                                    </p>
+                                </div>
+                                <a href="{% url 'course_details' enrollment.course.id %}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm">
+                                    View Course
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-600 dark:text-gray-400">No courses enrolled yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Announcements -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recent Announcements</h2>
+                
+                {% if announcements %}
+                    <div class="space-y-4">
+                        {% for announcement in announcements %}
+                            <div class="border-l-4 border-indigo-600 p-4 bg-gray-50 dark:bg-slate-700 rounded">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white">
+                                            {{ announcement.title }}
+                                        </h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                            {{ announcement.course.code }} - {{ announcement.posted_date|date:"M d, Y H:i" }}
+                                        </p>
+                                        <p class="text-gray-700 dark:text-gray-300 mt-2 text-sm">
+                                            {{ announcement.content|truncatewords:30 }}
+                                        </p>
+                                    </div>
+                                    <span class="px-3 py-1 text-xs font-bold rounded-full
+                                        {% if announcement.priority == 'urgent' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                        {% elif announcement.priority == 'high' %}bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200
+                                        {% else %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200{% endif %}
+                                    ">
+                                        {{ announcement.get_priority_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-600 dark:text-gray-400">No announcements yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Upcoming Classes -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Upcoming Classes</h2>
+                
+                {% if upcoming_classes %}
+                    <div class="space-y-3">
+                        {% for class in upcoming_classes|slice:":5" %}
+                            <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                                <div class="text-center bg-indigo-600 text-white rounded-lg p-3 min-w-fit">
+                                    <p class="font-bold text-lg">{{ class.day|slice:":3" }}</p>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-900 dark:text-white">{{ class.course.code }}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        {{ class.start_time|time:"H:i" }} - {{ class.end_time|time:"H:i" }} | {{ class.room }}, {{ class.building }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-600 dark:text-gray-400">No upcoming classes.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="space-y-8">
+            <!-- Quick Links -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-8">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Quick Links</h3>
+                <div class="space-y-3">
+                    <a href="{% url 'student_courses' %}" class="block w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-center font-medium">
+                        📚 My Courses
+                    </a>
+                    <a href="{% url 'student_grades' %}" class="block w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center font-medium">
+                        📊 Grades & GPA
+                    </a>
+                    <a href="{% url 'student_attendance' %}" class="block w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center font-medium">
+                        ✓ Attendance
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            {% if alerts %}
+                <div class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-xl p-8">
+                    <h3 class="text-lg font-bold text-red-900 dark:text-red-100 mb-4">⚠️ Active Alerts</h3>
+                    <div class="space-y-3">
+                        {% for alert in alerts|slice:":3" %}
+                            <div class="p-3 bg-white dark:bg-red-800 rounded-lg border-l-4 border-red-600">
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ alert.alert_type|title }}</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">{{ alert.message }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Student Info -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-8">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📋 Student Info</h3>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400">Program</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ student.get_program_display }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400">Current Semester</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ student.current_semester }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400">Intake</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ student.get_intake_display }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 dark:text-gray-400">Email</p>
+                        <p class="font-semibold text-gray-900 dark:text-white text-xs break-all">{{ student.university_email }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+

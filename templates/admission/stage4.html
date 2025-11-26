@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage 4: Program Details - CampusGPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+
+<!-- Navigation -->
+<nav class="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+            <a href="{% url 'admission_main' %}" class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                CampusGPT
+            </a>
+            <div class="text-sm text-slate-600 dark:text-slate-400">
+                Application ID: <span class="font-bold">{{ application.application_id }}</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Progress Bar -->
+<div class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-slate-900 dark:text-slate-50">Stage {{ stage }} of 5</h3>
+            <span class="text-sm text-slate-600 dark:text-slate-400">Review Program Details</span>
+        </div>
+        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 h-2 rounded-full" style="width: 80%"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-6xl mx-auto py-12 px-6">
+    <!-- Program Overview -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-slate-200 dark:border-slate-700 mb-8">
+        <h1 class="text-3xl font-bold mb-4 text-slate-900 dark:text-slate-50">
+            {{ course_selection.program|upper }} - Program Details
+        </h1>
+        <p class="text-slate-600 dark:text-slate-400 mb-6">
+            Review the program structure, curriculum roadmap, and fee details before confirming your admission.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30 p-4 rounded-lg">
+                <p class="text-sm text-slate-600 dark:text-slate-400">Duration</p>
+                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">8 Semesters</p>
+            </div>
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 p-4 rounded-lg">
+                <p class="text-sm text-slate-600 dark:text-slate-400">Total Credits</p>
+                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">120 Credits</p>
+            </div>
+            <div class="bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900/30 dark:to-teal-900/30 p-4 rounded-lg">
+                <p class="text-sm text-slate-600 dark:text-slate-400">Classes/Week</p>
+                <p class="text-2xl font-bold text-cyan-600 dark:text-cyan-400">20-25</p>
+            </div>
+            <div class="bg-gradient-to-br from-teal-50 to-green-50 dark:from-teal-900/30 dark:to-green-900/30 p-4 rounded-lg">
+                <p class="text-sm text-slate-600 dark:text-slate-400">Delivery Mode</p>
+                <p class="text-2xl font-bold text-teal-600 dark:text-teal-400">On-Campus</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Semester Roadmap -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-slate-200 dark:border-slate-700 mb-8">
+        <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-slate-50">
+            📚 8-Semester Curriculum Roadmap
+        </h2>
+
+        {% if roadmap %}
+        <div class="space-y-6">
+            <!-- Semester 1 -->
+            <div class="border-l-4 border-indigo-600 pl-6">
+                <h3 class="font-bold text-lg mb-3 text-slate-900 dark:text-slate-50">Semester 1</h3>
+                <div class="space-y-2">
+                    {% for course in roadmap %}
+                        {% if course.semester == 1 %}
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                            <p class="font-semibold text-slate-900 dark:text-slate-50">{{ course.course_code }} - {{ course.course_title }}</p>
+                            <p class="text-sm text-slate-600 dark:text-slate-400">{{ course.credits }} Credits</p>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Semester 2 -->
+            <div class="border-l-4 border-indigo-600 pl-6">
+                <h3 class="font-bold text-lg mb-3 text-slate-900 dark:text-slate-50">Semester 2</h3>
+                <div class="space-y-2">
+                    {% for course in roadmap %}
+                        {% if course.semester == 2 %}
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                            <p class="font-semibold text-slate-900 dark:text-slate-50">{{ course.course_code }} - {{ course.course_title }}</p>
+                            <p class="text-sm text-slate-600 dark:text-slate-400">{{ course.credits }} Credits</p>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Semesters 3-8 -->
+            {% for sem_num in "345678"|make_list %}
+            <div class="border-l-4 border-indigo-600 pl-6">
+                <h3 class="font-bold text-lg mb-3 text-slate-900 dark:text-slate-50">Semester {{ sem_num }}</h3>
+                <div class="space-y-2">
+                    {% for course in roadmap %}
+                        {% if course.semester|stringformat:"s" == sem_num %}
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                            <p class="font-semibold text-slate-900 dark:text-slate-50">{{ course.course_code }} - {{ course.course_title }}</p>
+                            <p class="text-sm text-slate-600 dark:text-slate-400">{{ course.credits }} Credits</p>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-slate-600 dark:text-slate-400 text-center py-8">
+            Curriculum roadmap loading... Please refresh the page if this persists.
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Fee Structure -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-slate-200 dark:border-slate-700 mb-8">
+        <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-slate-50">
+            💰 Fee Structure
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h3 class="font-bold text-lg mb-4 text-slate-900 dark:text-slate-50">One-Time Fees</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                        <span>Admission Fee</span>
+                        <span class="font-bold">PKR {{ admission_fee|floatformat:0 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                        <span>Student Card Fee</span>
+                        <span class="font-bold">PKR {{ student_card_fee|floatformat:0 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="font-bold text-lg mb-4 text-slate-900 dark:text-slate-50">Per Semester Fees</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                        <span>Semester Fee (Per Semester)</span>
+                        <span class="font-bold">PKR {{ semester_fee|floatformat:0 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                        <span>Transport (Optional)</span>
+                        <span class="font-bold">PKR 10,000/sem</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-gradient-to-r from-indigo-100 to-blue-100 dark:from-indigo-900/30 dark:to-blue-900/30 rounded-lg border border-indigo-200 dark:border-indigo-700">
+            <p class="text-sm text-indigo-800 dark:text-indigo-200">
+                <span class="font-bold">Note:</span> You will pay admission fee + first semester fee (half) + student card fee at enrollment. Remaining semester fees are payable at the start of each semester.
+            </p>
+        </div>
+    </div>
+
+    <!-- Agreement -->
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-slate-200 dark:border-slate-700">
+            <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-slate-50">
+                ✓ Agreement & Confirmation
+            </h2>
+
+            <label class="flex items-start gap-4 p-4 border-2 border-slate-200 dark:border-slate-600 rounded-xl cursor-pointer hover:border-indigo-500 transition">
+                <input
+                    type="checkbox"
+                    name="agree_terms"
+                    class="mt-1 w-5 h-5 text-indigo-600 cursor-pointer"
+                    required
+                >
+                <div>
+                    <p class="font-bold text-slate-900 dark:text-slate-50 mb-2">I agree to all terms and conditions</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                        I have reviewed the program details, curriculum roadmap, and fee structure. I understand the admission requirements and agree to abide by all university policies and regulations. I confirm that all information provided in this application is accurate and complete.
+                    </p>
+                </div>
+            </label>
+
+            <!-- Submit Button -->
+            <div class="flex gap-4 pt-8">
+                <a href="{% url 'admission_stage3' application.application_id %}" class="flex-1 px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50 font-bold rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition text-center">
+                    ← Back
+                </a>
+                <button
+                    type="submit"
+                    class="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-xl hover:shadow-lg transition"
+                >
+                    Proceed to Payment →
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
+
