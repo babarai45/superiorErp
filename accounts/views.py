@@ -45,9 +45,16 @@ def student_dashboard(request):
         logout(request)
         return redirect('student_login')
 
+    # Refresh user from database to get latest profile_image
+    from django.contrib.auth import get_user_model
+    request.user = get_user_model().objects.get(pk=request.user.pk)
+
     context = {
         'student': student_profile,
         'user': request.user,
+        'courses': [],
+        'enrollments': [],
+        'avg_attendance': 0,
     }
 
     return render(request, 'accounts/student_dashboard.html', context)
