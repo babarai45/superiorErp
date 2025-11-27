@@ -3,9 +3,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
-from django.db.models import Q, Avg, Count
+from django.db.models import Q, Avg, Sum
 from django.utils import timezone
 from datetime import timedelta, date
+import calendar
 
 from .models import User, StudentProfile
 from courses.models import Course, CourseEnrollment, Timetable, Announcement
@@ -62,13 +63,13 @@ def student_dashboard(request):
     # Get grades
     grades = GradeEntry.objects.filter(student=student)
 
-    # Get upcoming classes (next 7 days)
+    # Get upcoming classes (filter by today's day name)
     today = date.today()
+    today_day_name = calendar.day_name[today.weekday()]
     upcoming_classes = Timetable.objects.filter(
         course__in=courses,
-        created_at__lte=timezone.now(),
-        created_at__gte=timezone.now() - timedelta(days=30)
-    ).order_by('day', 'start_time')[:10]
+        day=today_day_name
+    ).order_by('start_time')[:10]
 
     # Get announcements
     announcements = Announcement.objects.filter(
@@ -76,9 +77,9 @@ def student_dashboard(request):
         is_visible=True
     ).order_by('-posted_date')[:5]
 
-    # Calculate statistics
-    total_classes = attendance_summary.aggregate(total=Count('total_classes'))['total'] or 0
-    present_classes = attendance_summary.aggregate(total=Count('present_count'))['total'] or 0
+    # Calculate statistics using Sum instead of Count
+    total_classes = attendance_summary.aggregate(total=Sum('total_classes'))['total'] or 0
+    present_classes = attendance_summary.aggregate(total=Sum('present_count'))['total'] or 0
     avg_attendance = attendance_summary.aggregate(avg=Avg('attendance_percentage'))['avg'] or 0
 
     # Get current semester GPA
