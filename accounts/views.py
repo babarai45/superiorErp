@@ -3,7 +3,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.db.models import Q, Avg, Count
+from django.utils import timezone
+from datetime import timedelta, date
+
 from .models import User, StudentProfile
+from courses.models import Course, CourseEnrollment, Timetable, Announcement
+from attendance.models import AttendanceSummary
+from grades.models import GradeEntry, SemesterGPA
 
 
 @require_http_methods(["GET", "POST"])
@@ -39,15 +46,60 @@ def student_login(request):
 def student_dashboard(request):
     """Student dashboard/profile view"""
     try:
-        student_profile = request.user.student_profile
+        student = request.user.student_profile
     except StudentProfile.DoesNotExist:
         messages.error(request, 'Student profile not found. Please contact administrator.')
         logout(request)
         return redirect('student_login')
 
+    # Get enrolled courses
+    enrollments = CourseEnrollment.objects.filter(student=student, status='enrolled')
+    courses = [e.course for e in enrollments]
+
+    # Get attendance summary
+    attendance_summary = AttendanceSummary.objects.filter(student=student)
+
+    # Get grades
+    grades = GradeEntry.objects.filter(student=student)
+
+    # Get upcoming classes (next 7 days)
+    today = date.today()
+    upcoming_classes = Timetable.objects.filter(
+        course__in=courses,
+        created_at__lte=timezone.now(),
+        created_at__gte=timezone.now() - timedelta(days=30)
+    ).order_by('day', 'start_time')[:10]
+
+    # Get announcements
+    announcements = Announcement.objects.filter(
+        Q(course__in=courses) | Q(course__isnull=True),
+        is_visible=True
+    ).order_by('-posted_date')[:5]
+
+    # Calculate statistics
+    total_classes = attendance_summary.aggregate(total=Count('total_classes'))['total'] or 0
+    present_classes = attendance_summary.aggregate(total=Count('present_count'))['total'] or 0
+    avg_attendance = attendance_summary.aggregate(avg=Avg('attendance_percentage'))['avg'] or 0
+
+    # Get current semester GPA
+    semester_gpa = SemesterGPA.objects.filter(
+        student=student,
+        semester=student.current_semester
+    ).first()
+
     context = {
-        'student': student_profile,
+        'student': student,
         'user': request.user,
+        'enrollments': enrollments,
+        'courses': courses,
+        'attendance_summary': attendance_summary,
+        'grades': grades,
+        'upcoming_classes': upcoming_classes,
+        'announcements': announcements,
+        'total_classes': total_classes,
+        'present_classes': present_classes,
+        'avg_attendance': avg_attendance,
+        'semester_gpa': semester_gpa,
     }
 
     return render(request, 'accounts/student_dashboard.html', context)
